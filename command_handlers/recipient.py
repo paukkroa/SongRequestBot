@@ -1,7 +1,7 @@
 from telegram import Update
 from telegram.ext import ContextTypes
 
-from db.recipient_queries import add_new_recipient, get_recipient_chat_id, get_address, create_new_address
+from db.recipient_queries import add_new_recipient, get_recipient_chat_id, get_recipient_addresses
 from db.user_queries import add_user
 from utils.chatting import safe_chat
 from processes import NewAddress, DeleteAddress
@@ -45,3 +45,25 @@ async def remove_address(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Start removal process
     address_removal = DeleteAddress(context, update, recipient_chat_id)
     await address_removal.process_request()
+
+async def list_addresses(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """List all addresses for the recipient"""
+    chat_id = update.effective_chat.id
+
+    # check if the recipient chat exists
+    recipient_chat_id = get_recipient_chat_id(chat_id)
+    if recipient_chat_id is None:
+        await safe_chat(context, chat_id, "You need to register before listing addresses.")
+        return
+
+    # Get all addresses
+    addresses = get_recipient_addresses(recipient_chat_id)
+    if not addresses:
+        await safe_chat(context, chat_id, "You don't have any addresses.")
+        return
+
+    # Send addresses
+    message = "Your addresses:\n"
+    for address in addresses:
+        message += f"{address}\n"
+    await safe_chat(context, chat_id, message)
