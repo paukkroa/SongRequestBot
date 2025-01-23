@@ -92,12 +92,13 @@ class NewAddress():
             await safe_chat(self.context, update.effective_chat.id, "Please send the password:")
             update = await self.context.application.update_queue.get()
             password = update.message.text
+            hashed_password = hashlib.sha256(password.encode()).hexdigest()
 
         # Create address
         chat_id = update.effective_chat.id
 
         self.logger.info(f"Creating new address {address} for recipient {self.recipient}.")
-        create_new_address(self.sql_connection, address, self.recipient, password, valid_until)
+        create_new_address(self.sql_connection, address, self.recipient, hashed_password, valid_until)
         
         msg = f"Address created successfully!\nCode: {address}\n"
         if validity_period != 'inf':

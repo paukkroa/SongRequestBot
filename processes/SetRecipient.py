@@ -1,5 +1,6 @@
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import ConversationHandler, ContextTypes
+import hashlib
 
 from utils.config import sql_connection
 from utils.logger import get_logger
@@ -71,7 +72,8 @@ class SetRecipient():
                     pwd_update = await context.application.update_queue.get()
                     if pwd_update.message and pwd_update.message.text:
                         password = pwd_update.message.text
-                        if check_password_match(self.sql_connection, address, password):
+                        hashed_password = hashlib.sha256(password.encode()).hexdigest()
+                        if check_password_match(self.sql_connection, address, hashed_password):
                             break
                         else:
                             if attempt < 2:
