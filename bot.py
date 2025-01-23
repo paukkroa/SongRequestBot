@@ -1,12 +1,14 @@
 from telegram import Update
-from telegram.ext import Application, CommandHandler, filters
+from telegram.ext import Application, CommandHandler, filters, ConversationHandler, CallbackQueryHandler, CommandHandler, MessageHandler
 
 from utils.config import BOT_TOKEN, LANGUAGE, sql_connection
 from utils.logger import get_logger
-
 import command_handlers as handlers
-
 from db.schema import create_tables
+from states import *
+from processes.Address import NewAddress, ExpireAddress, ToggleAddress, ReleaseAddress
+from processes.SetRecipient import SetRecipient
+from processes.SongRequest import SongRequest
 
 logger = get_logger(__name__)
 
@@ -45,6 +47,20 @@ def main() -> None:
         logger.error('Unsupported language specified, exiting')
         return
     
+    # Add conversation handlers
+    register_handler = ConversationHandler(
+        entry_points=[CommandHandler('register', handlers.register_user)],
+        states={
+            CHOOSE_NICKNAME: [CallbackQueryHandler(handlers.nickname_choice)],
+            SET_NICKNAME: [MessageHandler(filters.TEXT & ~filters.COMMAND, handlers.set_nickname)]
+        },
+        fallbacks=[]
+    )
+
+    # Add conversation handlers to application
+    application.add_handler(register_handler)
+
+
     # Run the bot until the user presses Ctrl-C
     application.run_polling(allowed_updates=Update.ALL_TYPES)
 
