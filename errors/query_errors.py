@@ -18,3 +18,10 @@ class AddressNotFoundError(Exception):
     def __init__(self, message="The forwarding address was not found"):
         self.message = message
         super().__init__(self.message)
+
+class UserNotFoundError(Exception):
+    """Exception raised when a user is not found."""
+    
+    def __init__(self, message="The user was not found"):
+        self.message = message
+        super().__init__(self.message)
