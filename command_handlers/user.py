@@ -5,8 +5,8 @@ from errors.query_errors import AddressExpiredError, AddressNotActiveError, Addr
 from utils.chatting import safe_chat
 from utils.logger import get_logger
 from utils.config import sql_connection
-from db.user_queries import get_recipient, get_nickname, add_user
-from processes import SongRequest
+from db import get_recipient, get_nickname, add_user, user_exists
+from processes import SongRequest, SetRecipient
 
 logger = get_logger(__name__)
 
@@ -14,40 +14,44 @@ async def set_recipient(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Set the recipient for messages"""
 
     chat_id = update.effective_chat.id
-    await safe_chat(context, chat_id, "Please provide the recipient code:")
-    context.application.add_handler(MessageHandler(
-        filters.TEXT & ~filters.COMMAND & filters.ChatType.PRIVATE, _get_code
-    ))
-
-async def _get_code(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
-    address = update.message.text
+    
+    set_recipient = SetRecipient(update, context, user_id, chat_id, sql_connection)
+    await set_recipient.process_request()
 
-    # Check if the address is valid
 
 async def register_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Register a new user"""
     user_id = update.effective_user.id
 
+    # Check if user already exists
+    if user_exists(sql_connection, user_id):
+        await safe_chat(context, user_id, "You are already registered!")
+        return
+
     # Ask if user wants a nickname
     keyboard = [[InlineKeyboardButton("Yes", callback_data='yes_nickname'),
                  InlineKeyboardButton("No", callback_data='no_nickname')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
-    await update.message.reply_text('Would you like to set a nickname?', reply_markup=reply_markup)
+    await update.message.reply_text('Hello there! Would you like to set a nickname?', reply_markup=reply_markup)
 
     # Wait for callback
     callback_query = await context.application.update_queue.get()
-    await callback_query.answer()
+    await context.bot.answer_callback_query(callback_query.callback_query.id)
 
-    if callback_query.data == 'yes_nickname':
+    if callback_query.callback_query.data == 'yes_nickname':
         await update.message.reply_text('Please enter your nickname:')
         msg = await context.application.update_queue.get()
-        nickname = msg.text
+        nickname = msg.message.text
     else:
         nickname = f"Unknown user"
 
     # Add user
-    add_user(user_id, nickname=nickname, role='user')
+    add_user(sql_connection, user_id, nickname=nickname, role='user')
+    if nickname != "Unknown user":
+        await safe_chat(context, user_id, f"Welcome {nickname}!")
+    else:
+        await safe_chat(context, user_id, "Welcome mysterious user!")
 
 async def song_request(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handle private messages which should be song requests"""
@@ -70,10 +74,10 @@ async def song_request(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await safe_chat(context, user_id, "No such code found.")
         return
     
-    nickname = get_nickname(user_id)
+    nickname = get_nickname(sql_connection, user_id)
     
     # Get song request info
-    song_request = SongRequest(update, context, recipient, nickname)
+    song_request = SongRequest(update, context, recipient, nickname, sql_connection)
     await song_request.process_request()
     
     
