@@ -5,6 +5,7 @@ from db.recipient_queries import add_new_recipient, get_recipient_chat_id, get_r
 from db.user_queries import add_user
 from utils.chatting import safe_chat
 from processes import NewAddress, DeleteAddress
+from utils.config import sql_connection
 
 async def register_recipient(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Register a new recipient"""
@@ -13,23 +14,23 @@ async def register_recipient(update: Update, context: ContextTypes.DEFAULT_TYPE)
     chat_type = update.effective_chat.type
 
     # Add user
-    add_user(user_id, role='recipient')
+    add_user(sql_connection, user_id, role='recipient')
 
     # Add recipient chat
-    add_new_recipient(user_id, chat_id, chat_type)
+    add_new_recipient(sql_connection, user_id, chat_id, chat_type)
 
 async def create_address(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Create a new address for the recipient"""
     chat_id = update.effective_chat.id
 
     # check if the recipient chat exists
-    recipient_chat_id = get_recipient_chat_id(chat_id)
+    recipient_chat_id = get_recipient_chat_id(sql_connection, chat_id)
     if recipient_chat_id is None:
         await safe_chat(context, chat_id, "You need to register before creating an address.")
         return
     
     # Create a new address
-    new_address = NewAddress(context, update, recipient_chat_id)
+    new_address = NewAddress(context, update, recipient_chat_id, sql_connection)
     await new_address.process_request()
 
 async def remove_address(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -37,13 +38,13 @@ async def remove_address(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
 
     # check if the recipient chat exists
-    recipient_chat_id = get_recipient_chat_id(chat_id)
+    recipient_chat_id = get_recipient_chat_id(sql_connection, chat_id)
     if recipient_chat_id is None:
         await safe_chat(context, chat_id, "You need to register before removing an address.")
         return
 
     # Start removal process
-    address_removal = DeleteAddress(context, update, recipient_chat_id)
+    address_removal = DeleteAddress(context, update, recipient_chat_id, sql_connection)
     await address_removal.process_request()
 
 async def list_addresses(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -51,13 +52,13 @@ async def list_addresses(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
 
     # check if the recipient chat exists
-    recipient_chat_id = get_recipient_chat_id(chat_id)
+    recipient_chat_id = get_recipient_chat_id(sql_connection, chat_id)
     if recipient_chat_id is None:
         await safe_chat(context, chat_id, "You need to register before listing addresses.")
         return
 
     # Get all addresses
-    addresses = get_recipient_addresses(recipient_chat_id)
+    addresses = get_recipient_addresses(sql_connection, recipient_chat_id)
     if not addresses:
         await safe_chat(context, chat_id, "You don't have any addresses.")
         return
