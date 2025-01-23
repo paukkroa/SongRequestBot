@@ -4,7 +4,7 @@ from telegram.ext import ConversationHandler, ContextTypes
 from utils.config import sql_connection
 from utils.logger import get_logger
 from utils.chatting import safe_chat
-from db import set_user_forward_address, is_password_set, check_password_match
+from db import set_user_forward_address, is_password_set, check_password_match, get_current_address
 from telegram.ext import MessageHandler, filters
 
 class SetRecipient():
@@ -22,7 +22,31 @@ class SetRecipient():
         self.logger = get_logger(__name__)
 
     async def process_request(self):
-        await safe_chat(self.context, self.chat_id, "Please provide the recipient code:")
+        current_address = get_current_address(self.sql_connection, self.user_id)
+        if current_address:
+            await safe_chat(self.context, self.chat_id, f"Your current code is: {current_address}")
+            
+            keyboard = [
+                [
+                    InlineKeyboardButton("Change code", callback_data="change"),
+                    InlineKeyboardButton("Exit", callback_data="exit")
+                ]
+            ]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            await safe_chat(self.context, self.chat_id, "Would you like to change the code?", reply_markup=reply_markup)
+            
+            try:
+                update = await self.context.application.update_queue.get()
+                if update.callback_query:
+                    if update.callback_query.data == "exit":
+                        await safe_chat(self.context, self.chat_id, "Operation cancelled.")
+                        return ConversationHandler.END
+                    # If change, continue with the code flow
+            except Exception as e:
+                self.logger.error(f"Error processing callback: {e}")
+                return ConversationHandler.END
+
+        await safe_chat(self.context, self.chat_id, "Please provide the code:")
         
         try:
             # Wait for text message

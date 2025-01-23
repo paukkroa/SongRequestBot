@@ -204,3 +204,9 @@ def is_password_set(conn: sqlite3.Connection, address: str):
         return False
     
     return result is not None
+
+def get_current_address(conn: sqlite3.Connection, user_id: str):
+    address = get_forward_address(conn, user_id)
+    if address is None:
+        return None
+    return address[0]
