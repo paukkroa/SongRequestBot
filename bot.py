@@ -44,13 +44,6 @@ def main() -> None:
         logger.error('Unsupported language specified, exiting')
         return
     
-    # Add generic message handlers
-    # Handle private messages which should be song requests
-    application.add_handler(MessageHandler(
-        filters.TEXT & ~filters.COMMAND & filters.ChatType.PRIVATE,
-        handlers.handle_private_message)
-    )
-
     # Run the bot until the user presses Ctrl-C
     application.run_polling(allowed_updates=Update.ALL_TYPES)
 
