@@ -87,7 +87,7 @@ class NewAddress():
         update = await self.context.application.update_queue.get()
         query = update.callback_query
         
-        password = ""
+        password = None
         if query.data == 'yes_pwd':
             await safe_chat(self.context, update.effective_chat.id, "Please send the password:")
             update = await self.context.application.update_queue.get()

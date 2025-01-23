@@ -60,7 +60,7 @@ def get_address_attributes(conn: sqlite3.Connection, address: str):
         }
     return None
 
-def create_new_address(conn: sqlite3.Connection, address: str, chat_id: str, password: str = "", valid_until: datetime = None):
+def create_new_address(conn: sqlite3.Connection, address: str, chat_id: str, password: str = None, valid_until: datetime = None):
     cursor = conn.cursor()
     cursor.execute('''
         INSERT INTO R_CHAT_ADDRESS (address, chat_id, password, valid_until)

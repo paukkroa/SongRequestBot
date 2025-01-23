@@ -173,3 +173,34 @@ def set_user_forward_address(conn: sqlite3.Connection, user_id: str, address: st
     conn.commit()
     cursor.close()
     return True
+
+def check_password_match(conn: sqlite3.Connection, address: str, password: str):
+    cursor = conn.cursor()
+    cursor.execute('''
+        SELECT password
+        FROM R_CHAT_ADDRESS
+        WHERE address = ?
+    ''', (address,))
+    result = cursor.fetchone()
+    cursor.close()
+    
+    if result is None:
+        return False
+    return result[0] == password
+
+def is_password_set(conn: sqlite3.Connection, address: str):
+    cursor = conn.cursor()
+    cursor.execute('''
+        SELECT password
+        FROM R_CHAT_ADDRESS
+        WHERE address = ?
+    ''', (address,))
+    result = cursor.fetchone()
+    cursor.close()
+
+    result = result[0] if result is not None else None
+
+    if result == "":
+        return False
+    
+    return result is not None
