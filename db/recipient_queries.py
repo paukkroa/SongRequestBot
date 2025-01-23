@@ -185,8 +185,13 @@ def toggle_active(conn: sqlite3.Connection, address: str):
     active, valid_until = result
     
     # Check if address has expired
-    if valid_until and datetime.strptime(valid_until, '%Y-%m-%d %H:%M:%S.%f').replace(tzinfo=timezone.utc) <= datetime.now(timezone.utc):
-        raise AddressExpiredError("Address has expired")
+    if valid_until:
+        try:
+            parsed_date = datetime.strptime(valid_until, '%Y-%m-%d %H:%M:%S.%f')
+        except ValueError:
+            parsed_date = datetime.strptime(valid_until, '%Y-%m-%d %H:%M:%S')
+        if parsed_date.replace(tzinfo=timezone.utc) <= datetime.now(timezone.utc):
+            raise AddressExpiredError("Address has expired")
 
     # Toggle active status and update uby/udate
     cursor = conn.cursor()
