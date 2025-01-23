@@ -5,11 +5,12 @@ from utils.config import sql_connection
 from utils.logger import get_logger
 from utils.chatting import safe_chat
 from db import set_user_forward_address
+from telegram.ext import MessageHandler, filters
 
 class SetRecipient():
-    def __init__(self, 
-                 context, 
+    def __init__(self,  
                  update,
+                 context,
                  user_id,
                  chat_id,
                  sql_connection = sql_connection):
@@ -22,7 +23,19 @@ class SetRecipient():
 
     async def process_request(self):
         await safe_chat(self.context, self.chat_id, "Please provide the recipient code:")
-        return self.handle_code
+        
+        try:
+            # Wait for text message
+            update = await self.context.application.update_queue.get()
+            
+            # If it's a text message
+            if update.message and update.message.text:
+                return await self.handle_code(update, self.context)
+                
+        except Exception as e:
+            self.logger.error(f"Error waiting for recipient code: {e}")
+            await safe_chat(self.context, self.chat_id, "An error occurred. Please try again.")
+            return ConversationHandler.END
 
     async def handle_code(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         address = update.message.text
@@ -31,7 +44,7 @@ class SetRecipient():
             result = set_user_forward_address(self.sql_connection, self.user_id, address)
         except Exception as e:
             self.logger.error(f"Error setting recipient: {e}")
-            await safe_chat(context, self.chat_id, e)
+            await safe_chat(context, self.chat_id, str(e))
             return ConversationHandler.END
         
         await safe_chat(context, self.chat_id, "Code accepted! You can now start sending song requests using the /biisitoive command.")
