@@ -25,12 +25,12 @@ def main() -> None:
     elif LANGUAGE == 'fi':
         # Käyttäjän kommennot
         application.add_handler(CommandHandler("koodi", handlers.set_recipient)) # Minne viesti välitetään (tapahtuma tai esiintyjä)
-        application.add_handler(CommandHandler("terve", handlers.register_user)) # Rekisteröi käyttäjän
+        application.add_handler(CommandHandler("start", handlers.register_user)) # Rekisteröi käyttäjän
         application.add_handler(CommandHandler("biisitoive", handlers.song_request)) # Lähetä biisitoive oikealle vastaanottajalle
         
 
         # Vastaanottajan komennot
-        application.add_handler(CommandHandler("rekisteröidy", handlers.register_recipient)) # Luo uusi vastaanottajatunnus
+        application.add_handler(CommandHandler("vastaanottaja", handlers.register_recipient)) # Luo uusi vastaanottajatunnus
         application.add_handler(CommandHandler("uusi", handlers.create_address)) # Minne viesti välitetään (nykyinen chat) (pitäiskö olla vaihtoehtona automaattinen tai kustomoitu salasana)
         application.add_handler(CommandHandler("poista", handlers.remove_address)) # Poista osoite kokonaan (poistaa myös listasta)
         application.add_handler(CommandHandler("omat", handlers.list_addresses)) # Näytä kaikki omat luodut koodit
