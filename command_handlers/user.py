@@ -15,7 +15,11 @@ async def set_recipient(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     chat_id = update.effective_chat.id
     user_id = update.effective_user.id
-    
+
+    if not user_exists(sql_connection, user_id):
+        await safe_chat(context, user_id, "You need to register before using the bot!")
+        return
+
     set_recipient = SetRecipient(update, context, user_id, chat_id, sql_connection)
     await set_recipient.process_request()
 
@@ -71,7 +75,7 @@ async def song_request(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await safe_chat(context, user_id, "Code is not active.")
         return
     except AddressNotFoundError as e:
-        await safe_chat(context, user_id, "No such code found.")
+        await safe_chat(context, user_id, "You have not set a code yet. Set a code with /koodi")
         return
     
     nickname = get_nickname(sql_connection, user_id)
