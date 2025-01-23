@@ -60,9 +60,9 @@ def is_recipient_valid(conn: sqlite3.Connection, user_id: str):
     valid_until = cursor.fetchone()
     cursor.close()
     
-    if valid_until is None:
+    if valid_until[0] is None:
         return True
-    valid_until_datetime = datetime.fromisoformat(valid_until[0]).replace(tzinfo=timezone.utc)
+    valid_until_datetime = datetime.fromisoformat(str(valid_until[0])).replace(tzinfo=timezone.utc)
     return valid_until_datetime > datetime.now(timezone.utc)
 
 def get_recipient(conn: sqlite3.Connection, user_id: str):
