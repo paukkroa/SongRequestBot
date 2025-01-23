@@ -26,7 +26,6 @@ def create_tables(conn: sqlite3.Connection) -> None:
     CREATE TABLE IF NOT EXISTS D_RECIPIENT_CHAT (
         chat_id TEXT PRIMARY KEY,
         chat_type TEXT NOT NULL,
-        role TEXT NOT NULL,
         iby TEXT DEFAULT 'system',
         uby TEXT DEFAULT 'system',
         idate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -37,10 +36,10 @@ def create_tables(conn: sqlite3.Connection) -> None:
     # Addresses and the chat they are linked to D_ADDRESS
     conn.execute('''
     CREATE TABLE IF NOT EXISTS R_CHAT_ADDRESS (
-        address INTEGER PRIMARY KEY,
+        address TEXT PRIMARY KEY,
         chat_id TEXT NOT NULL,
         password TEXT,
-        active INTEGER DEFAULT '1',
+        active INTEGER DEFAULT 1,
         valid_until TIMESTAMP,
         iby TEXT DEFAULT 'system',
         uby TEXT DEFAULT 'system',

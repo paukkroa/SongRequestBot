@@ -1,3 +1,3 @@
-from .Address import NewAddress, DeleteAddress
+from .Address import NewAddress, ExpireAddress, ToggleAddress, ReleaseAddress
 from .SongRequest import SongRequest
 from .SetRecipient import SetRecipient

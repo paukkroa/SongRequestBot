@@ -16,6 +16,12 @@ async def set_recipient(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
     user_id = update.effective_user.id
 
+    # Check if the chat is a private chat
+    if update.effective_chat.type != 'private':
+        await safe_chat(context, chat_id, "This command can only be used in private chats.")
+        return
+    
+    # Check if user exists
     if not user_exists(sql_connection, user_id):
         await safe_chat(context, user_id, "You need to register before using the bot!")
         return
@@ -27,6 +33,13 @@ async def set_recipient(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def register_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Register a new user"""
     user_id = update.effective_user.id
+    chat_id = update.effective_chat.id
+
+    # Check if the chat is a private chat
+    if update.effective_chat.type != 'private':
+        await safe_chat(context, chat_id, "This command can only be used in private chats.")
+        return
+    
 
     # Check if user already exists
     if user_exists(sql_connection, user_id):
@@ -59,6 +72,13 @@ async def register_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def song_request(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handle private messages which should be song requests"""
+
+    chat_id = update.effective_chat.id
+
+    # Check if the chat is a private chat
+    if update.effective_chat.type != 'private':
+        await safe_chat(context, chat_id, "This command can only be used in private chats.")
+        return
 
     # TODO: check when the user last sent a song request, limit to once per 10 minutes
 

@@ -1,5 +1,5 @@
 from telegram import Update
-from telegram.ext import Application, CommandHandler, MessageHandler, filters, CallbackQueryHandler
+from telegram.ext import Application, CommandHandler, filters
 
 from utils.config import BOT_TOKEN, LANGUAGE, sql_connection
 from utils.logger import get_logger
@@ -32,11 +32,12 @@ def main() -> None:
         # Vastaanottajan komennot
         application.add_handler(CommandHandler("vastaanottaja", handlers.register_recipient)) # Luo uusi vastaanottajatunnus
         application.add_handler(CommandHandler("uusi", handlers.create_address)) # Minne viesti välitetään (nykyinen chat) (pitäiskö olla vaihtoehtona automaattinen tai kustomoitu salasana)
-        application.add_handler(CommandHandler("poista", handlers.remove_address)) # Poista osoite kokonaan (poistaa myös listasta)
+        application.add_handler(CommandHandler("poista", handlers.remove_address)) # Poista osoite käytöstä
         application.add_handler(CommandHandler("omat", handlers.list_addresses)) # Näytä kaikki omat luodut koodit
+        application.add_handler(CommandHandler("onoff", handlers.toggle_address)) # Aseta osoite jäähytilaan (ei vastaanota viestejä) tai takaisin päälle
+        application.add_handler(CommandHandler("vapauta", handlers.release_address)) # Vapauta osoite (poista tietokannasta)
     
         # TODO
-        # application.add_handler(CommandHandler("jäähy", handlers.pause_address)) # Poista osoite hetkellisesti tai toistaiseksi käytöstä
         # application.add_handler(CommandHandler("block", handlers.block_sender)) # Blokkaa lähettäjä (in case spam)
         # osoitteen muokkaus 
 
