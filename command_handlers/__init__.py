@@ -1,3 +1,3 @@
-from recipient import *
-from user import *
-from message_handlers import *
+from .message_handlers import *
+from .recipient import *
+from .user import *
