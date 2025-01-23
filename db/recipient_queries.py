@@ -1,7 +1,7 @@
-from utils.config import sql_connection 
+import sqlite3
 
-def add_new_recipient(chat_id: str, chat_type: str):
-    cursor = sql_connection.cursor()
+def add_new_recipient(conn: sqlite3.Connection, chat_id: str, chat_type: str):
+    cursor = conn.cursor()
     # Check if record already exists
     cursor.execute('''
         SELECT 1 FROM D_RECIPIENT_CHAT 
@@ -13,12 +13,12 @@ def add_new_recipient(chat_id: str, chat_type: str):
             INSERT INTO D_RECIPIENT_CHAT (chat_id, chat_type)
             VALUES (?, ?)
         ''', (chat_id, chat_type))
-        sql_connection.commit()
+        conn.commit()
     
     cursor.close()
 
-def get_recipient_chat_id(chat_id: str):
-    cursor = sql_connection.cursor()
+def get_recipient_chat_id(conn: sqlite3.Connection, chat_id: str):
+    cursor = conn.cursor()
     cursor.execute('''
         SELECT chat_id 
         FROM D_RECIPIENT_CHAT 
@@ -28,8 +28,8 @@ def get_recipient_chat_id(chat_id: str):
     cursor.close()
     return chat_id
 
-def get_address_attributes(address: str):
-    cursor = sql_connection.cursor()
+def get_address_attributes(conn: sqlite3.Connection, address: str):
+    cursor = conn.cursor()
     cursor.execute('''
         SELECT address, chat_id, password, active, valid_until 
         FROM R_CHAT_ADDRESS 
@@ -48,26 +48,26 @@ def get_address_attributes(address: str):
         }
     return None
 
-def create_new_address(address: str, chat_id: str, password: str = None, valid_until: str = None):
-    cursor = sql_connection.cursor()
+def create_new_address(conn: sqlite3.Connection, address: str, chat_id: str, password: str = None, valid_until: str = None):
+    cursor = conn.cursor()
     cursor.execute('''
         INSERT INTO R_CHAT_ADDRESS (address, chat_id, password, valid_until)
         VALUES (?, ?, ?, ?)
     ''', (address, chat_id, password, valid_until))
-    sql_connection.commit()
+    conn.commit()
     cursor.close()
 
-def remove_address(address: str):
-    cursor = sql_connection.cursor()
+def remove_address(conn: sqlite3.Connection, address: str):
+    cursor = conn.cursor()
     cursor.execute('''
         DELETE FROM R_CHAT_ADDRESS 
         WHERE address = ?
     ''', (address,))
-    sql_connection.commit()
+    conn.commit()
     cursor.close()
 
-def get_recipient_addresses(chat_id: str):
-    cursor = sql_connection.cursor()
+def get_recipient_addresses(conn: sqlite3.Connection, chat_id: str):
+    cursor = conn.cursor()
     cursor.execute('''
         SELECT address, password, active, valid_until 
         FROM R_CHAT_ADDRESS 
