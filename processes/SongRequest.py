@@ -4,17 +4,20 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
 from utils.chatting import safe_chat
 from utils.logger import get_logger
+from utils.config import sql_connection
 
 class SongRequest:
     def __init__(self, 
                  context, 
                  update, 
                  recipient,
-                 sender_nickname = "Unknown"):
+                 sender_nickname = "Unknown",
+                 sql_connection = sql_connection):
         self.context = context
         self.update = update
         self.recipient = recipient
         self.sender_nickname = sender_nickname
+        self.sql_connection = sql_connection
         self.song_name = None
         self.artist_name = None
         self.logger = get_logger(__name__)
@@ -70,7 +73,7 @@ class SongRequest:
         query = update.callback_query
         await query.answer()
         if query.data == 'yes':
-            message = f"New song request from {self.sender_nickname}!\nSong: {self.song_name}\nArtist: {self.artist_name}"
+            message = f"New song request from {self.sender_nickname}!\nSong: {self.song_name}\nArtist: {self.artist_name}\nNotes: {self.notes}"
             await safe_chat(context, self.recipient, message)
             await safe_chat(context, update.effective_chat.id, "Song request sent!")
             self.logger.info(f"Song request from {self.sender_id} sent to {self.recipient}")

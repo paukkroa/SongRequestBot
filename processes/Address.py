@@ -6,16 +6,21 @@ import string
 import hashlib
 
 from utils.chatting import safe_chat
+from utils.config import sql_connection
+from utils.logger import get_logger
 from db.recipient_queries import create_new_address, get_address_attributes, remove_address, get_recipient_addresses
 
 class NewAddress():
     def __init__(self, 
                  context, 
                  update,
-                 recipient):
+                 recipient,
+                 sql_connection = sql_connection):
         self.context = context
         self.update = update
         self.recipient = recipient
+        self.sql_connection = sql_connection
+        self.logger = get_logger(__name__)
 
     async def process_request(self, update, context):
         keyboard = [
@@ -35,7 +40,7 @@ class NewAddress():
         else:
             while True:
                 address = ''.join(random.choices(string.ascii_letters + string.digits, k=10))
-                if get_address_attributes(address) is None:
+                if get_address_attributes(self.sql_connection, address) is None:
                     break
             context.user_data['address'] = address
             await self.ask_validity_period(update, context)
@@ -43,7 +48,7 @@ class NewAddress():
 
     async def handle_custom_address(self, update, context):
         address = update.message.text
-        if get_address_attributes(address) is not None:
+        if get_address_attributes(self.sql_connection, address) is not None:
             await safe_chat(context, update.effective_chat.id,
                           "This address already exists. Please choose another one:")
             return 'WAITING_CUSTOM_ADDRESS'
@@ -90,7 +95,7 @@ class NewAddress():
 
     async def handle_password(self, update, context):
         password = update.message.text
-        password = hashlib.sha256(password.encode()).hexdigest()
+        #password = hashlib.sha256(password.encode()).hexdigest()
         await self.finalize_address(update, context, password)
         return ConversationHandler.END
 
@@ -98,7 +103,7 @@ class NewAddress():
         address = context.user_data['address']
         valid_until = context.user_data['valid_until']
         chat_id = update.effective_chat.id
-        create_new_address(address, chat_id, password, 1, valid_until)
+        create_new_address(self.sql_connection, address, chat_id, password, 1, valid_until)
         
         msg = f"Address created successfully!\nAddress: {address}\nValid until: {valid_until.strftime('%Y-%m-%d %H:%M:%S')}"
         if password:
@@ -109,13 +114,16 @@ class NewAddress():
 class DeleteAddress():
     def __init__(self, 
                  context, 
-                 update):
+                 update,
+                 sql_connection = sql_connection):
         self.context = context
         self.update = update
+        self.sql_connection = sql_connection
+        self.logger = get_logger(__name__)
 
     async def process_request(self, update, context):
         chat_id = update.effective_chat.id
-        addresses = get_recipient_addresses(chat_id)
+        addresses = get_recipient_addresses(self.sql_connection, chat_id)
         
         if not addresses:
             await safe_chat(context, chat_id, "You don't have any addresses set.")
@@ -149,7 +157,7 @@ class DeleteAddress():
         query = update.callback_query
         if query.data == 'yes_delete':
             address = context.user_data['address_to_delete']
-            remove_address(address)
+            remove_address(self.sql_connection, address)
             await safe_chat(context, update.effective_chat.id, f"Address {address} deleted successfully.")
         else:
             await safe_chat(context, update.effective_chat.id, "Operation cancelled.")
