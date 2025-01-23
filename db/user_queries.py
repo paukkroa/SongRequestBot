@@ -1,5 +1,5 @@
 import sqlite3
-from datetime import datetime
+from datetime import datetime, timezone
 
 from errors.query_errors import *
 from utils.logger import get_logger
@@ -61,8 +61,9 @@ def is_recipient_valid(conn: sqlite3.Connection, user_id: str):
     cursor.close()
     
     if valid_until is None:
-        return False
-    return valid_until[0] > datetime.now()
+        return True
+    valid_until_datetime = datetime.fromisoformat(valid_until[0]).replace(tzinfo=timezone.utc)
+    return valid_until_datetime > datetime.now(timezone.utc)
 
 def get_recipient(conn: sqlite3.Connection, user_id: str):
     address = get_forward_address(conn, user_id)

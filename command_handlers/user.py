@@ -101,7 +101,7 @@ async def song_request(update: Update, context: ContextTypes.DEFAULT_TYPE):
     nickname = get_nickname(sql_connection, user_id)
     
     # Get song request info
-    song_request = SongRequest(update, context, recipient, nickname, sql_connection)
+    song_request = SongRequest(context, update, recipient, user_id, nickname, sql_connection)
     await song_request.process_request()
     
     
