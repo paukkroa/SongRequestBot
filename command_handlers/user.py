@@ -53,13 +53,19 @@ async def register_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text('Hello there! Would you like to set a nickname?', reply_markup=reply_markup)
 
     # Wait for callback
-    callback_query = await context.application.update_queue.get()
-    await context.bot.answer_callback_query(callback_query.callback_query.id)
+    while True:
+        callback_query = await context.application.update_queue.get()
+        if callback_query.message.chat.id == chat_id:
+            await context.bot.answer_callback_query(callback_query.callback_query.id)
+            break
 
     if callback_query.callback_query.data == 'yes_nickname':
         await update.message.reply_text('Please enter your nickname:')
-        msg = await context.application.update_queue.get()
-        nickname = msg.message.text
+        while True:
+            msg = await context.application.update_queue.get()
+            if msg.message.chat.id == chat_id:
+                nickname = msg.message.text
+                break
     else:
         nickname = f"Unknown user"
 

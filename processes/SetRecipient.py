@@ -51,11 +51,12 @@ class SetRecipient():
         
         try:
             # Wait for text message
-            update = await self.context.application.update_queue.get()
-            
-            # If it's a text message
-            if update.message and update.message.text:
-                return await self.handle_code(update, self.context)
+            while True:
+                update = await self.context.application.update_queue.get()
+                if update.effective_chat.id == self.chat_id:
+                    # If it's a text message
+                    if update.message and update.message.text:
+                        return await self.handle_code(update, self.context)
                 
         except Exception as e:
             self.logger.error(f"Error waiting for recipient code: {e}")
@@ -66,21 +67,27 @@ class SetRecipient():
         address = update.message.text
 
         if is_password_set(self.sql_connection, address):
+            password_not_correct = True
             for attempt in range(3):
                 await safe_chat(context, self.chat_id, "Please enter the password:")
                 try:
-                    pwd_update = await context.application.update_queue.get()
-                    if pwd_update.message and pwd_update.message.text:
-                        password = pwd_update.message.text
-                        hashed_password = hashlib.sha256(password.encode()).hexdigest()
-                        if check_password_match(self.sql_connection, address, hashed_password):
-                            break
-                        else:
-                            if attempt < 2:
-                                await safe_chat(context, self.chat_id, "Incorrect password. Please try again.")
-                            else:
-                                await safe_chat(context, self.chat_id, "Maximum password attempts reached.")
-                                return ConversationHandler.END
+                    if not password_not_correct:
+                        break
+                    while password_not_correct:
+                        pwd_update = await context.application.update_queue.get()
+                        if update.effective_chat.id == self.chat_id:
+                            if pwd_update.message and pwd_update.message.text:
+                                password = pwd_update.message.text
+                                hashed_password = hashlib.sha256(password.encode()).hexdigest()
+                                if check_password_match(self.sql_connection, address, hashed_password):
+                                    password_not_correct = False
+                                    break
+                                else:
+                                    if attempt < 2:
+                                        await safe_chat(context, self.chat_id, "Incorrect password. Please try again.")
+                                    else:
+                                        await safe_chat(context, self.chat_id, "Maximum password attempts reached.")
+                                        return ConversationHandler.END
                 except Exception as e:
                     self.logger.error(f"Error processing password: {e}")
                     await safe_chat(context, self.chat_id, "An error occurred. Please try again.")

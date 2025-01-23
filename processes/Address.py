@@ -21,6 +21,7 @@ class NewAddress():
         self.recipient = recipient
         self.sql_connection = sql_connection
         self.logger = get_logger(__name__)
+        self.chat_id = update.effective_chat.id
 
     async def process_request(self):
         keyboard = [
@@ -32,19 +33,29 @@ class NewAddress():
                        "Do you want to use a custom code or a randomly generated one?",
                        reply_markup)
         
-        update = await self.context.application.update_queue.get()
-        query = update.callback_query
+        while True:
+            update = await self.context.application.update_queue.get()
+            if update.effective_chat.id == self.chat_id:
+                query = update.callback_query
+                break
         
         if query.data == 'custom':
             await safe_chat(self.context, update.effective_chat.id, "Please send your preferred code:")
-            update = await self.context.application.update_queue.get()
-            address = update.message.text
-            
+            while True:
+                update = await self.context.application.update_queue.get()
+                if update.effective_chat.id == self.chat_id:
+                    address = update.message.text
+                    break
+
             while get_address_attributes(self.sql_connection, address) is not None:
                 await safe_chat(self.context, update.effective_chat.id,
                               "This code is already in use. Please choose another one:")
-                update = await self.context.application.update_queue.get()
-                address = update.message.text
+                while True:
+                    update = await self.context.application.update_queue.get()
+                    if update.effective_chat.id == self.chat_id:
+                        address = update.message.text
+                        break
+
         else:
             while True:
                 address = ''.join(random.choices(string.ascii_letters + string.digits, k=10))
@@ -63,9 +74,11 @@ class NewAddress():
         await safe_chat(self.context, update.effective_chat.id,
                        "How long should the code be valid?",
                        reply_markup)
-        
-        update = await self.context.application.update_queue.get()
-        query = update.callback_query
+        while True:
+            update = await self.context.application.update_queue.get()
+            if update.effective_chat.id == self.chat_id:
+                query = update.callback_query
+                break
         days_map = {'1d': 1, '3d': 3, '7d': 7, '30d': 30, 'inf': 365000}  # ~1000 years
         validity_period = query.data
         days = days_map[query.data]
@@ -84,16 +97,22 @@ class NewAddress():
                        "Would you like to set a password?",
                        reply_markup)
         
-        update = await self.context.application.update_queue.get()
-        query = update.callback_query
+        while True:
+            update = await self.context.application.update_queue.get()
+            if update.effective_chat.id == self.chat_id:
+                query = update.callback_query
+                break
         
         password = None
         hashed_password = None
         if query.data == 'yes_pwd':
             await safe_chat(self.context, update.effective_chat.id, "Please send the password:")
-            update = await self.context.application.update_queue.get()
-            password = update.message.text
-            hashed_password = hashlib.sha256(password.encode()).hexdigest()
+            while True:
+                update = await self.context.application.update_queue.get()
+                if update.effective_chat.id == self.chat_id:
+                    password = update.message.text
+                    hashed_password = hashlib.sha256(password.encode()).hexdigest()
+                    break
 
         # Create address
         chat_id = update.effective_chat.id
@@ -134,8 +153,10 @@ class ExpireAddress():
         
         await safe_chat(self.context, self.chat_id, "Select address to be expired:", reply_markup)
         
-        update = await self.context.application.update_queue.get()
-        return await self.handle_address_selection(update, self.context)
+        while True:
+            update = await self.context.application.update_queue.get()
+            if update.effective_chat.id == self.chat_id:
+                return await self.handle_address_selection(update, self.context)
 
     async def handle_address_selection(self, update, context):
         query = update.callback_query
@@ -152,9 +173,10 @@ class ExpireAddress():
         await safe_chat(context, update.effective_chat.id, 
                         f"Are you sure you want to expire address {query.data}?",
                         reply_markup)
-        
-        update = await self.context.application.update_queue.get()
-        return await self.handle_confirm_delete(update, context)
+        while True:
+            update = await self.context.application.update_queue.get()
+            if update.effective_chat.id == self.chat_id:
+                return await self.handle_confirm_delete(update, context)
 
     async def handle_confirm_delete(self, update, context):
         query = update.callback_query
@@ -192,8 +214,11 @@ class ToggleAddress():
         
         await safe_chat(self.context, self.chat_id, "Select address to toggle:", reply_markup)
         
-        update = await self.context.application.update_queue.get()
-        query = update.callback_query
+        while True:
+            update = await self.context.application.update_queue.get()
+            if update.effective_chat.id == self.chat_id:
+                query = update.callback_query
+                break
         
         if query.data == 'exit':
             await safe_chat(self.context, update.effective_chat.id, "Operation cancelled.")
@@ -234,8 +259,10 @@ class ReleaseAddress():
         
         await safe_chat(self.context, self.chat_id, "Select address to be released:", reply_markup)
         
-        update = await self.context.application.update_queue.get()
-        return await self.handle_address_selection(update, self.context)
+        while True:
+            update = await self.context.application.update_queue.get()
+            if update.effective_chat.id == self.chat_id:
+                return await self.handle_address_selection(update, self.context)
 
     async def handle_address_selection(self, update, context):
         query = update.callback_query
@@ -252,9 +279,10 @@ class ReleaseAddress():
         await safe_chat(context, update.effective_chat.id, 
                         f"Are you sure you want to release address {query.data}?",
                         reply_markup)
-        
-        update = await self.context.application.update_queue.get()
-        return await self.handle_confirm_delete(update, context)
+        while True:
+            update = await self.context.application.update_queue.get()
+            if update.effective_chat.id == self.chat_id:
+                return await self.handle_confirm_delete(update, context)
 
     async def handle_confirm_delete(self, update, context):
         query = update.callback_query

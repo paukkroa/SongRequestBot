@@ -23,17 +23,22 @@ class SongRequest:
         self.artist_name_value = None
         self.logger = get_logger(__name__)
         self.sender_id = sender_id
+        self.chat_id = update.effective_chat.id
 
     async def process_request(self):
         await safe_chat(self.context, self.update.effective_chat.id, "What's the name of the song?")
-        update = await self.context.application.update_queue.get()
-        return await self.song_name(update, self.context)
+        while True:
+            update = await self.context.application.update_queue.get()
+            if update.effective_chat.id == self.chat_id:
+                return await self.song_name(update, self.context)
 
     async def song_name(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         self.song_name_value = update.message.text
         await safe_chat(context, update.effective_chat.id, "Who's the artist?")
-        update = await self.context.application.update_queue.get()
-        return await self.artist_name(update, self.context)
+        while True:
+            update = await self.context.application.update_queue.get()
+            if update.effective_chat.id == self.chat_id:
+                return await self.artist_name(update, self.context)
 
     async def artist_name(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         self.artist_name_value = update.message.text
@@ -42,8 +47,10 @@ class SongRequest:
         await safe_chat(context, update.effective_chat.id, 
                        "Add any notes about your request (max 150 characters) or click Skip:", 
                        reply_markup=reply_markup)
-        update = await self.context.application.update_queue.get()
-        return await self.notes(update, self.context)
+        while True:
+            update = await self.context.application.update_queue.get()
+            if update.effective_chat.id == self.chat_id:
+                return await self.notes(update, self.context)
 
     async def notes(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         if update.callback_query:
@@ -56,8 +63,10 @@ class SongRequest:
         if len(update.message.text) > 150:
             await safe_chat(context, update.effective_chat.id, 
                           "Notes too long! Please keep it under 150 characters. Try again:")
-            update = await self.context.application.update_queue.get()
-            return await self.notes(update, self.context)
+            while True:
+                update = await self.context.application.update_queue.get()
+                if update.effective_chat.id == self.chat_id:
+                    return await self.notes(update, self.context)
         
         self.notes = update.message.text
         return await self.show_confirmation(update, self.context)
@@ -70,8 +79,10 @@ class SongRequest:
         if self.notes:
             confirm_text += f"\nNotes: {self.notes}"
         await safe_chat(context, update.effective_chat.id, confirm_text, reply_markup=reply_markup)
-        update = await self.context.application.update_queue.get()
-        return await self.confirm(update, self.context)
+        while True:
+            update = await self.context.application.update_queue.get()
+            if update.effective_chat.id == self.chat_id:
+                return await self.confirm(update, self.context)
 
     async def confirm(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         query = update.callback_query
