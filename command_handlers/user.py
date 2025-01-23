@@ -92,7 +92,7 @@ async def song_request(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await safe_chat(context, user_id, "Code has expired.")
         return
     except AddressNotActiveError as e:
-        await safe_chat(context, user_id, "Code is not active.")
+        await safe_chat(context, user_id, "Code has been turned off by the recipient.")
         return
     except AddressNotFoundError as e:
         await safe_chat(context, user_id, "You have not set a code yet. Set a code with /koodi")
