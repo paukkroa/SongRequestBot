@@ -74,7 +74,7 @@ def main() -> None:
 
     # --- Add database cleaner job ---
     scheduler = AsyncIOScheduler()
-    scheduler.add_job(clean_expired_addresses, 'interval', minutes=1, args=[application, sql_connection])
+    scheduler.add_job(clean_expired_addresses, 'interval', hours=1, args=[application, sql_connection])
     scheduler.start()
 
     # --- Run the bot until the user presses Ctrl-C ---
