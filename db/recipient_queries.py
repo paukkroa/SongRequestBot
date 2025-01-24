@@ -209,7 +209,7 @@ def toggle_active(conn: sqlite3.Connection, address: str):
 
     return True
 
-def release_address(conn: sqlite3.Connection, address: str):
+def release_address_from_database(conn: sqlite3.Connection, address: str):
     cursor = conn.cursor()
     cursor.execute('''
         DELETE FROM R_CHAT_ADDRESS 
