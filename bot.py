@@ -1,8 +1,10 @@
 from telegram import Update
 from telegram.ext import Application, CommandHandler, filters, ConversationHandler, CallbackQueryHandler, CommandHandler, MessageHandler
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from utils.config import BOT_TOKEN, LANGUAGE, sql_connection
 from utils.logger import get_logger
+from utils.cleaner import clean_expired_addresses
 import command_handlers as handlers
 from db.schema import create_tables
 
@@ -70,6 +72,10 @@ def main() -> None:
     update_nickname_conv_handler = handlers.get_change_nickname_conv_handler()
     application.add_handler(update_nickname_conv_handler)
 
+    # --- Add database cleaner job ---
+    scheduler = AsyncIOScheduler()
+    scheduler.add_job(clean_expired_addresses, 'interval', minutes=1, args=[application, sql_connection])
+    scheduler.start()
 
     # --- Run the bot until the user presses Ctrl-C ---
     application.run_polling(allowed_updates=Update.ALL_TYPES)
