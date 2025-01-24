@@ -123,6 +123,72 @@ def get_set_recipient_conv_handler():
     )
 
 
+# States for nickname change conversation
+NICKNAME_CHANGE, NEW_NICKNAME = 5, 6
+
+async def change_nickname(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Entry point for changing nickname conversation"""
+    chat_id = update.effective_chat.id
+    user_id = update.effective_user.id
+
+    if update.effective_chat.type != 'private':
+        await safe_chat(context, chat_id, "This command can only be used in private chats.")
+        return ConversationHandler.END
+    
+    if not user_exists(sql_connection, user_id):
+        await safe_chat(context, user_id, "You need to register before using the bot!")
+        return ConversationHandler.END
+
+    current_nickname = get_nickname(sql_connection, user_id)
+    if current_nickname:
+        await safe_chat(context, chat_id, f"Your current nickname is: {current_nickname}")
+        keyboard = [
+            [
+                InlineKeyboardButton("Change nickname", callback_data="change"),
+                InlineKeyboardButton("Exit", callback_data="exit")
+            ]
+        ]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        await safe_chat(context, chat_id, "Would you like to change your nickname?", reply_markup=reply_markup)
+        return NICKNAME_CHANGE
+    
+    await safe_chat(context, chat_id, "Please enter your new nickname:")
+    return NEW_NICKNAME
+
+async def handle_nickname_change(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Handle whether to change the existing nickname"""
+    query = update.callback_query
+    await query.answer()
+    
+    if query.data == "exit":
+        await safe_chat(context, update.effective_chat.id, "Operation cancelled.")
+        return ConversationHandler.END
+    
+    await safe_chat(context, update.effective_chat.id, "Please enter your new nickname:")
+    return NEW_NICKNAME
+
+async def handle_new_nickname(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Handle the new nickname input"""
+    new_nickname = update.message.text
+    update_nickname(sql_connection, update.effective_user.id, new_nickname)
+    await safe_chat(context, update.effective_chat.id, f"Your nickname has been updated to: {new_nickname}")
+    return ConversationHandler.END
+
+def get_change_nickname_conv_handler():
+    """Get the conversation handler for changing nickname"""
+    return ConversationHandler(
+        entry_points=[MessageHandler(filters.COMMAND & filters.Regex('^/nikki$'), change_nickname)],
+        states={
+            NICKNAME_CHANGE: [CallbackQueryHandler(handle_nickname_change)],
+            NEW_NICKNAME: [MessageHandler(filters.TEXT & ~filters.COMMAND, handle_new_nickname)]
+        },
+        fallbacks=[MessageHandler(filters.ALL, timeout)],
+        conversation_timeout=300,
+        per_user=True,
+        per_chat=True
+    )
+
+
 # States for the conversation
 NICKNAME_CHOICE, ENTER_NICKNAME = 10, 11
 
@@ -155,7 +221,7 @@ async def nickname_choice(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await safe_chat(context, query.message.chat_id, 'Please enter your nickname:')
         return ENTER_NICKNAME
     else:
-        add_user(sql_connection, update.effective_user.id, nickname="Unknown user", role='user')
+        add_user(sql_connection, update.effective_user.id, nickname=None, role='user')
         await safe_chat(context, query.message.chat_id, "Welcome mysterious user!")
         return ConversationHandler.END
 
@@ -308,8 +374,6 @@ def get_song_request_conv_handler():
         fallbacks=[MessageHandler(filters.ALL, timeout)],
         conversation_timeout=300,
         per_user=True,
-        per_chat=True
+        per_chat=True 
     )
-    
-    
     

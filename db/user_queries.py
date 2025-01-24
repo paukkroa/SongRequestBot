@@ -116,6 +116,16 @@ def get_nickname(conn: sqlite3.Connection, user_id: str):
         return None
     return nickname[0]
 
+def update_nickname(conn: sqlite3.Connection, user_id: str, nickname: str):
+    cursor = conn.cursor()
+    cursor.execute('''
+        UPDATE D_USER
+        SET nickname = ?
+        WHERE user_id = ?
+    ''', (nickname, user_id))
+    conn.commit()
+    cursor.close()
+
 def address_exists(conn: sqlite3.Connection, address: str):
     cursor = conn.cursor()
     cursor.execute('''

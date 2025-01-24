@@ -22,17 +22,11 @@ def main() -> None:
         return
     elif LANGUAGE == 'fi':
         # Käyttäjän kommennot
-        #application.add_handler(CommandHandler("koodi", handlers.set_recipient)) # Minne viesti välitetään (tapahtuma tai esiintyjä)
-        #application.add_handler(CommandHandler("start", handlers.register_user)) # Rekisteröi käyttäjän
-        #application.add_handler(CommandHandler("biisitoive", handlers.song_request)) # Lähetä biisitoive oikealle vastaanottajalle
+        # Handlataan nyt conversation handlereissa
 
         # Vastaanottajan komennot
         application.add_handler(CommandHandler("vastaanottaja", handlers.register_recipient)) # Luo uusi vastaanottajatunnus
-        #application.add_handler(CommandHandler("uusi", handlers.create_address)) # Minne viesti välitetään (nykyinen chat) (pitäiskö olla vaihtoehtona automaattinen tai kustomoitu salasana)
-        #application.add_handler(CommandHandler("poista", handlers.remove_address)) # Poista osoite käytöstä
         application.add_handler(CommandHandler("omat", handlers.list_addresses)) # Näytä kaikki omat luodut koodit
-        #application.add_handler(CommandHandler("onoff", handlers.toggle_address)) # Aseta osoite jäähytilaan (ei vastaanota viestejä) tai takaisin päälle
-        #application.add_handler(CommandHandler("vapauta", handlers.release_address)) # Vapauta osoite (poista tietokannasta)
     
         # TODO
         # application.add_handler(CommandHandler("block", handlers.block_sender)) # Blokkaa lähettäjä (in case spam)
@@ -71,6 +65,10 @@ def main() -> None:
     # Release address
     release_address_conv_handler = handlers.get_release_address_conv_handler()
     application.add_handler(release_address_conv_handler)
+
+    # Update nickname
+    update_nickname_conv_handler = handlers.get_change_nickname_conv_handler()
+    application.add_handler(update_nickname_conv_handler)
 
 
     # --- Run the bot until the user presses Ctrl-C ---
