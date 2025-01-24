@@ -36,14 +36,14 @@ async def clean_expired_addresses(context, sql_connection):
     # Send notifications to users
     for chat_id, addresses in notifications.items():
         if len(addresses) == 1:
-            message = (f"Hello! Just letting you know that your expired address "
+            message = (f"Hello! Just letting you know that your expired code "
                       f"{addresses[0]} has been automatically removed from the system "
-                      f"as it has been inactive for over 10 days.")
+                      f"as it has been expired for over 10 days.")
         else:
             addresses_str = "\n".join(addresses)
-            message = (f"Hello! Just letting you know that your expired addresses have "
+            message = (f"Hello! Just letting you know that your expired codes have "
                       f"been automatically removed from the system as they have been "
-                      f"inactive for over 10 days:\n{addresses_str}")
+                      f"expired for over 10 days:\n{addresses_str}")
         
         await safe_chat(context, chat_id, message)
 
