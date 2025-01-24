@@ -1,5 +1,6 @@
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup
 from telegram.ext import ContextTypes, MessageHandler, filters, ConversationHandler, CallbackQueryHandler
+import hashlib
 
 from errors.query_errors import AddressExpiredError, AddressNotActiveError, AddressNotFoundError
 from utils.chatting import safe_chat
