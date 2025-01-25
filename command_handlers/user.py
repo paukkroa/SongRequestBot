@@ -1,5 +1,5 @@
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup
-from telegram.ext import ContextTypes, MessageHandler, filters, ConversationHandler, CallbackQueryHandler
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram.ext import ContextTypes, MessageHandler, filters, ConversationHandler, CallbackQueryHandler, CommandHandler
 import hashlib
 
 from errors.query_errors import AddressExpiredError, AddressNotActiveError, AddressNotFoundError
@@ -116,7 +116,7 @@ def get_set_recipient_conv_handler():
             CODE_INPUT: [MessageHandler(filters.TEXT & ~filters.COMMAND, handle_code_input)],
             PASSWORD_INPUT: [MessageHandler(filters.TEXT & ~filters.COMMAND, handle_password)]
         },
-        fallbacks=[MessageHandler(filters.ALL, timeout)],
+        fallbacks=[MessageHandler(filters.ALL, timeout), CommandHandler("cancel", lambda u,c: ConversationHandler.END)],
         conversation_timeout=300,  # 5 minutes timeout
         per_user=True,
         per_chat=True
@@ -182,7 +182,7 @@ def get_change_nickname_conv_handler():
             NICKNAME_CHANGE: [CallbackQueryHandler(handle_nickname_change)],
             NEW_NICKNAME: [MessageHandler(filters.TEXT & ~filters.COMMAND, handle_new_nickname)]
         },
-        fallbacks=[MessageHandler(filters.ALL, timeout)],
+        fallbacks=[MessageHandler(filters.ALL, timeout), CommandHandler("cancel", lambda u,c: ConversationHandler.END)],
         conversation_timeout=300,
         per_user=True,
         per_chat=True
@@ -243,7 +243,7 @@ def get_register_conv_handler():
             NICKNAME_CHOICE: [CallbackQueryHandler(nickname_choice)],
             ENTER_NICKNAME: [MessageHandler(filters.TEXT & ~filters.COMMAND, save_nickname)]
         },
-        fallbacks=[MessageHandler(filters.ALL, timeout)],
+        fallbacks=[MessageHandler(filters.ALL, timeout), CommandHandler("cancel", lambda u,c: ConversationHandler.END)],
         conversation_timeout=300,
         per_user=True,
         per_chat=True
@@ -371,7 +371,7 @@ def get_song_request_conv_handler():
             ],
             CONFIRMATION: [CallbackQueryHandler(confirm, pattern='^(yes|no)$')]
         },
-        fallbacks=[MessageHandler(filters.ALL, timeout)],
+        fallbacks=[MessageHandler(filters.ALL, timeout), CommandHandler("cancel", lambda u,c: ConversationHandler.END)],
         conversation_timeout=300,
         per_user=True,
         per_chat=True 
