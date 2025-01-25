@@ -45,6 +45,12 @@ async def create_address(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not recipient_exists:
         await safe_chat(context, chat_id, "You need to register before creating an address.")
         return ConversationHandler.END
+    
+    # check how many addresses the recipient owns already
+    address_count = get_amount_of_recipient_addresses(sql_connection, chat_id)
+    if address_count >= 5:
+        await safe_chat(context, chat_id, "You can only have 5 addresses at a time. Release some before creating new ones.")
+        return ConversationHandler.END
 
     keyboard = [
         [InlineKeyboardButton("Custom", callback_data='custom'),

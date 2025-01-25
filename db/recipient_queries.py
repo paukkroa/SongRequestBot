@@ -60,6 +60,17 @@ def get_address_attributes(conn: sqlite3.Connection, address: str):
         }
     return None
 
+def get_amount_of_recipient_addresses(conn: sqlite3.Connection, chat_id: str):
+    cursor = conn.cursor()
+    cursor.execute('''
+        SELECT COUNT(*) 
+        FROM R_CHAT_ADDRESS 
+        WHERE chat_id = ?
+    ''', (chat_id,))
+    amount = cursor.fetchone()
+    cursor.close()
+    return amount[0]
+
 def create_new_address(conn: sqlite3.Connection, address: str, chat_id: str, password: str = None, valid_until: datetime = None):
     cursor = conn.cursor()
     cursor.execute('''
