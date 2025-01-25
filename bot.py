@@ -4,7 +4,7 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from utils.config import BOT_TOKEN, LANGUAGE, sql_connection
 from utils.logger import get_logger
-from utils.cleaner import clean_expired_addresses
+from utils.cleaner import clean_expired_addresses, expiration_notification
 import command_handlers as handlers
 from db.schema import create_tables
 
@@ -72,9 +72,10 @@ def main() -> None:
     update_nickname_conv_handler = handlers.get_change_nickname_conv_handler()
     application.add_handler(update_nickname_conv_handler)
 
-    # --- Add database cleaner job ---
+    # --- Add database cleaning jobs ---
     scheduler = AsyncIOScheduler()
     scheduler.add_job(clean_expired_addresses, 'interval', hours=1, args=[application, sql_connection])
+    scheduler.add_job(expiration_notification, 'interval', hours=1, args=[application, sql_connection])
     scheduler.start()
 
     # --- Run the bot until the user presses Ctrl-C ---
