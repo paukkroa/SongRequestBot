@@ -33,7 +33,6 @@ def main() -> None:
     
         # TODO
         # application.add_handler(CommandHandler("block", handlers.block_sender)) # Blokkaa lähettäjä (in case spam)
-        # osoitteen muokkaus 
 
     else:
         logger.error('Unsupported language specified, exiting')
