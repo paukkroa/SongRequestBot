@@ -230,3 +230,36 @@ def release_address_from_database(conn: sqlite3.Connection, address: str):
     cursor.close()
 
     logger.info(f"Address {address} released")
+
+
+def get_expired_addresses(conn: sqlite3.Connection, chat_id: str):
+    """Get expired addresses for the current recipient"""
+    cursor = conn.cursor()
+    cursor.execute('''
+        SELECT address
+        FROM R_CHAT_ADDRESS 
+        WHERE chat_id = ?
+        AND valid_until < datetime('now')
+    ''', (chat_id,))
+    addresses = cursor.fetchall()
+    cursor.close()
+
+    if not addresses:
+        return None
+
+    return [addr[0] for addr in addresses]
+
+def renew_address(conn: sqlite3.Connection, address: str, valid_until: datetime):
+    cursor = conn.cursor()
+    cursor.execute('''
+        UPDATE R_CHAT_ADDRESS 
+        SET valid_until = ?,
+            uby = 'renewal_process',
+            udate = datetime('now')
+        WHERE address = ?
+    ''', (valid_until, address))
+    conn.commit()
+    cursor.close()
+
+    logger.info(f"Address {address} renewed until {valid_until}")
+    return True

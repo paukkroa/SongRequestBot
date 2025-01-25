@@ -68,6 +68,10 @@ def main() -> None:
     release_address_conv_handler = handlers.get_release_address_conv_handler()
     application.add_handler(release_address_conv_handler)
 
+    # Renew address
+    renew_address_conv_handler = handlers.get_renew_address_conv_handler()
+    application.add_handler(renew_address_conv_handler)
+
     # Update nickname
     update_nickname_conv_handler = handlers.get_change_nickname_conv_handler()
     application.add_handler(update_nickname_conv_handler)

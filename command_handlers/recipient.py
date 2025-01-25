@@ -161,6 +161,11 @@ async def finalize_address(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await safe_chat(context, chat_id, msg)
     return ConversationHandler.END
 
+async def timeout(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Handle conversation timeout"""
+    await safe_chat(context, update.effective_chat.id, "Operation timed out. Please try again.")
+    return ConversationHandler.END
+
 # Create conversation handler
 def get_create_address_conv_handler():
     return ConversationHandler(
@@ -172,7 +177,7 @@ def get_create_address_conv_handler():
             CHOOSE_PASSWORD: [CallbackQueryHandler(handle_password_choice)],
             ENTER_PASSWORD: [MessageHandler(filters.TEXT & ~filters.COMMAND, handle_password)]
         },
-        fallbacks=[],
+        fallbacks=[MessageHandler(filters.ALL, timeout), CommandHandler("cancel", lambda u,c: ConversationHandler.END)],
         conversation_timeout=300,  # 5 minutes
         per_user=True,
         per_chat=True
@@ -241,7 +246,7 @@ def get_remove_address_conv_handler():
             CHOOSE_ADDRESS: [CallbackQueryHandler(handle_address_selection)],
             CONFIRM_DELETE: [CallbackQueryHandler(handle_confirm_delete)]
         },
-        fallbacks=[],
+        fallbacks=[MessageHandler(filters.ALL, timeout), CommandHandler("cancel", lambda u,c: ConversationHandler.END)],
         conversation_timeout=300,  # 5 minutes
         per_user=True,
         per_chat=True
@@ -317,7 +322,7 @@ def get_toggle_address_conv_handler():
         states={
             TOGGLE_CHOOSE_ADDRESS: [CallbackQueryHandler(handle_toggle_selection)]
         },
-        fallbacks=[],
+        fallbacks=[MessageHandler(filters.ALL, timeout), CommandHandler("cancel", lambda u,c: ConversationHandler.END)],
         conversation_timeout=300,  # 5 minutes
         per_user=True,
         per_chat=True
@@ -386,8 +391,87 @@ def get_release_address_conv_handler():
             RELEASE_CHOOSE_ADDRESS: [CallbackQueryHandler(handle_release_selection)],
             RELEASE_CONFIRM: [CallbackQueryHandler(handle_release_confirm)]
         },
-        fallbacks=[],
+        fallbacks=[MessageHandler(filters.ALL, timeout), CommandHandler("cancel", lambda u,c: ConversationHandler.END)],
         conversation_timeout=300,  # 5 minutes
+        per_user=True,
+        per_chat=True
+    )
+
+# Define states for renew address conversation
+RENEW_CHOOSE_ADDRESS, RENEW_CHOOSE_VALIDITY = 70, 71
+
+async def renew_address_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Start the renewal process for expired addresses"""
+    chat_id = update.effective_chat.id
+
+    # check if the recipient chat exists
+    recipient_chat_id = get_recipient_chat_id(sql_connection, chat_id)
+    if not recipient_chat_id:
+        await safe_chat(context, chat_id, "You need to register before renewing addresses.")
+        return ConversationHandler.END
+
+    
+    expired_addresses = get_expired_addresses(sql_connection, chat_id)
+    if not expired_addresses:
+        await safe_chat(context, chat_id, "You don't have any expired addresses.")
+        return ConversationHandler.END
+    
+    keyboard = [[InlineKeyboardButton(addr, callback_data=addr)] for addr in expired_addresses]
+    keyboard.append([InlineKeyboardButton("Cancel", callback_data='cancel')])
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    
+    await safe_chat(context, chat_id, "Select a code to renew:", reply_markup)
+    return RENEW_CHOOSE_ADDRESS
+
+async def handle_renew_address_selection(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+    
+    if query.data == 'cancel':
+        await safe_chat(context, update.effective_chat.id, "Operation cancelled.")
+        return ConversationHandler.END
+    
+    context.user_data['address_to_renew'] = query.data
+    keyboard = [[
+        InlineKeyboardButton("1 day", callback_data='1d'),
+        InlineKeyboardButton("3 days", callback_data='3d'),
+        InlineKeyboardButton("7 days", callback_data='7d'),
+        InlineKeyboardButton("30 days", callback_data='30d')
+    ]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    
+    await safe_chat(context, update.effective_chat.id, "How long should the code be valid?", reply_markup)
+    return RENEW_CHOOSE_VALIDITY
+
+async def handle_renew_validity(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+    
+    days_map = {'1d': 1, '3d': 3, '7d': 7, '30d': 30}
+    days = days_map[query.data]
+    
+    new_valid_until = datetime.now(timezone.utc) + timedelta(days=days)
+    new_valid_until = new_valid_until.strftime('%Y-%m-%d %H:%M:%S')
+    address = context.user_data['address_to_renew']
+    
+    if renew_address(sql_connection, address, new_valid_until):
+        await safe_chat(context, update.effective_chat.id, 
+                        f"Address {address} renewed successfully!")
+    else:
+        await safe_chat(context, update.effective_chat.id, 
+                        f"Failed to renew address {address}.")
+    
+    return ConversationHandler.END
+
+def get_renew_address_conv_handler():
+    return ConversationHandler(
+        entry_points=[CommandHandler("uudista", renew_address_start)],
+        states={
+            RENEW_CHOOSE_ADDRESS: [CallbackQueryHandler(handle_renew_address_selection)],
+            RENEW_CHOOSE_VALIDITY: [CallbackQueryHandler(handle_renew_validity)]
+        },
+        fallbacks=[MessageHandler(filters.ALL, timeout), CommandHandler("cancel", lambda u,c: ConversationHandler.END)],
+        conversation_timeout=300,
         per_user=True,
         per_chat=True
     )
