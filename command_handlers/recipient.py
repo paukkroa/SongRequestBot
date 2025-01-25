@@ -501,6 +501,7 @@ async def recipient_help_message(update: Update, context: ContextTypes.DEFAULT_T
     chat_id = update.effective_chat.id
     help_message = (
         "Event organizer commands:\n\n"
+        "/vastaanottaja - Registers the current chat as a song request receiver\n"
         "/uusi - Create a new code. Directs song requests to the chat where the code was created. Max 5 codes per chat\n"
         "/omat - List the codes of the current chat\n"
         "/onoff - Toggle a code between active and inactive\n"
