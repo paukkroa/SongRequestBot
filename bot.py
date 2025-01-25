@@ -24,11 +24,12 @@ def main() -> None:
         return
     elif LANGUAGE == 'fi':
         # Käyttäjän kommennot
-        # Handlataan nyt conversation handlereissa
+        application.add_handler(CommandHandler("apua", handlers.help_message)) # Help message
 
         # Vastaanottajan komennot
         application.add_handler(CommandHandler("vastaanottaja", handlers.register_recipient)) # Luo uusi vastaanottajatunnus
         application.add_handler(CommandHandler("omat", handlers.list_addresses)) # Näytä kaikki omat luodut koodit
+        application.add_handler(CommandHandler("jarjestaja_apu", handlers.recipient_help_message)) # Luo uusi koodi
     
         # TODO
         # application.add_handler(CommandHandler("block", handlers.block_sender)) # Blokkaa lähettäjä (in case spam)

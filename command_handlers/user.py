@@ -384,3 +384,13 @@ def get_song_request_conv_handler():
         per_chat=True 
     )
     
+async def help_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Send help message"""
+    help_text = ("Requesting songs:\n\n"
+                "/start - Register as a user\n"
+                "/koodi - Set the code provided by the event organizer\n"
+                "/biisitoive - Send a song request to the event organizer\n"
+                "/nikki - Set or update your nickname\n"
+                "/cancel - Cancel any operation\n"
+                "\nEvent organizer help /jarjestaja_apu")
+    await safe_chat(context, update.effective_chat.id, help_text)

@@ -495,3 +495,18 @@ def get_renew_address_conv_handler():
         per_user=True,
         per_chat=True
     )
+
+async def recipient_help_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Send help message for recipient commands"""
+    chat_id = update.effective_chat.id
+    help_message = (
+        "Event organizer commands:\n\n"
+        "/uusi - Create a new code. Directs song requests to the chat where the code was created. Max 5 codes per chat\n"
+        "/omat - List the codes of the current chat\n"
+        "/onoff - Toggle a code between active and inactive\n"
+        "/vanhenna - Expire a code (expired codes get released after 10 days)\n"
+        "/vapauta - Release a code. Anyone can claim the code when it is released\n"
+        "/uudista - Renew an expired code\n"
+        "/cancel - Cancel any operation\n"
+    )
+    await safe_chat(context, chat_id, help_message)
