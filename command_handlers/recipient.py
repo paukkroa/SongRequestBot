@@ -98,7 +98,7 @@ async def ask_validity(update: Update, context: ContextTypes.DEFAULT_TYPE):
         InlineKeyboardButton("3 days", callback_data='3d'),
         InlineKeyboardButton("7 days", callback_data='7d'),
         InlineKeyboardButton("30 days", callback_data='30d'),
-        InlineKeyboardButton("Indefinitely", callback_data='inf'),
+        #InlineKeyboardButton("Indefinitely", callback_data='inf'),
     ]]
     reply_markup = InlineKeyboardMarkup(keyboard)
     await safe_chat(context, update.effective_chat.id,
@@ -110,7 +110,7 @@ async def handle_validity(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
     
-    days_map = {'1d': 1, '3d': 3, '7d': 7, '30d': 30, 'inf': 365000}
+    days_map = {'1d': 1, '3d': 3, '7d': 7, '30d': 30}
     validity_period = query.data
     days = days_map[validity_period]
     
