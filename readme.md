@@ -23,11 +23,13 @@ A Telegram bot for managing song requests between users and event organizers/DJs
 3. Manage your codes:
     - `/omat` - View all your codes (active/inactive/expired)
     - `/onoff` - Toggle code status (active/inactive)
-    - `/poista` - Expire a code (expired codes will be released after 10 days)
+    - `/vanhenna` - Expire a code (expired codes will be released after 10 days)
     - `/vapauta` - Delete and release a code
 
 ## Technical Details
+- Codes always have an expiration date
 - Expired codes are automatically released after 10 days
+- Expired codes can be renewed
 - One chat can be both a user and a recipient
 - Recipients can be private or group chats
 - User can only be private chats
