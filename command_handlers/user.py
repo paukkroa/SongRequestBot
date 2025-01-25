@@ -118,7 +118,7 @@ def get_set_recipient_conv_handler():
             ConversationHandler.TIMEOUT: [MessageHandler(filters.ALL, timeout)]
         },
         fallbacks=[
-            MessageHandler(filters.ALL & ~filters.Regex('^/cancel$'), timeout),
+            MessageHandler(filters.ALL, timeout),
             CommandHandler("cancel", lambda _,__: ConversationHandler.END)
         ],
         conversation_timeout=300,  # 5 minutes timeout
@@ -188,7 +188,7 @@ def get_change_nickname_conv_handler():
             ConversationHandler.TIMEOUT: [MessageHandler(filters.ALL, timeout)]
         },
         fallbacks=[
-            MessageHandler(filters.ALL & ~filters.Regex('^/cancel$'), timeout),
+            MessageHandler(filters.ALL, timeout),
             CommandHandler("cancel", lambda _,__: ConversationHandler.END)
         ],
         conversation_timeout=300,
@@ -249,7 +249,7 @@ def get_register_conv_handler():
             ConversationHandler.TIMEOUT: [MessageHandler(filters.ALL, timeout)]
         },
         fallbacks=[
-            MessageHandler(filters.ALL & ~filters.Regex('^/cancel$'), timeout),
+            MessageHandler(filters.ALL, timeout),
             CommandHandler("cancel", lambda _,__: ConversationHandler.END)
         ],
         conversation_timeout=300,
@@ -376,7 +376,7 @@ def get_song_request_conv_handler():
             ConversationHandler.TIMEOUT: [MessageHandler(filters.ALL, timeout)]
         },
         fallbacks=[
-            MessageHandler(filters.ALL & ~filters.Regex('^/cancel$'), timeout),
+            MessageHandler(filters.ALL, timeout),
             CommandHandler("cancel", lambda _,__: ConversationHandler.END)
         ],
         conversation_timeout=300,
