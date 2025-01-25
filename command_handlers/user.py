@@ -15,6 +15,11 @@ filterwarnings(action="ignore", message=r".*CallbackQueryHandler", category=PTBU
 
 logger = get_logger(__name__)
 
+async def timeout(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Handle conversation timeout/cancel"""
+    await safe_chat(context, update.effective_chat.id, "Operation cancelled or timed out.")
+    return ConversationHandler.END
+
 # States for recipient setting conversation
 CODE_INPUT, PASSWORD_INPUT, CHANGE_CODE = 0, 1, 2
 
@@ -101,11 +106,6 @@ async def handle_password(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     await safe_chat(context, update.effective_chat.id, "Incorrect password. Please try again.")
     return PASSWORD_INPUT
-
-async def timeout(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Handle conversation timeout"""
-    await safe_chat(context, update.effective_chat.id, "Operation timed out. Please try again.")
-    return ConversationHandler.END
 
 def get_set_recipient_conv_handler():
     """Get the conversation handler for setting recipient"""
@@ -232,10 +232,6 @@ async def save_nickname(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await safe_chat(context, update.effective_chat.id, f"Welcome {nickname}!")
     return ConversationHandler.END
 
-async def timeout(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await safe_chat(context, update.effective_chat.id, "Registering failed, please send /start again.")
-    return ConversationHandler.END
-
 def get_register_conv_handler():
     return ConversationHandler(
         entry_points=[MessageHandler(filters.COMMAND & filters.Regex('^/start$'), register_user)],
@@ -351,11 +347,6 @@ async def confirm(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await safe_chat(context, update.effective_chat.id, "Song request cancelled.")
         logger.info(f"Song request from {update.effective_user.id} cancelled")
     
-    return ConversationHandler.END
-
-async def timeout(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Handle conversation timeout"""
-    await safe_chat(context, update.effective_chat.id, "Song request timed out. Please try again.")
     return ConversationHandler.END
 
 def get_song_request_conv_handler():
