@@ -16,6 +16,11 @@ from utils.chatting import safe_chat
 from utils.config import sql_connection
 from datetime import datetime, timezone, timedelta
 
+async def timeout(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Handle conversation timeout"""
+    await safe_chat(context, update.effective_chat.id, "Operation cancelled or timed out.")
+    return ConversationHandler.END
+
 async def register_recipient(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Register a new recipient"""
     chat_id = update.effective_chat.id
@@ -159,11 +164,6 @@ async def finalize_address(update: Update, context: ContextTypes.DEFAULT_TYPE):
         msg += f"\nPassword: {password}"
     
     await safe_chat(context, chat_id, msg)
-    return ConversationHandler.END
-
-async def timeout(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Handle conversation timeout"""
-    await safe_chat(context, update.effective_chat.id, "Operation timed out. Please try again.")
     return ConversationHandler.END
 
 # Create conversation handler
