@@ -231,6 +231,7 @@ async def nickname_choice(update: Update, context: ContextTypes.DEFAULT_TYPE):
     else:
         add_user(sql_connection, update.effective_user.id, nickname=None, role='user')
         await safe_chat(context, query.message.chat_id, "Welcome mysterious user!")
+        await safe_chat(context, update.effective_chat.id, "⁉️ Here is some basic info ⁉️\n - Do you already know the code for the event? 👀 If you do, use the /koodi command to set the code.\nAfter this you can send song requests to the event organizer/DJ using the command /biisitoive\n - If you don't know the code, ask for it from the event organizer/DJ! 😊\n\n👀 Are you an event organizer or a DJ and want to setup your own code?\nFind out how using /jarjestaja_apu 🙌")
         return ConversationHandler.END
 
 async def save_nickname(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -238,6 +239,7 @@ async def save_nickname(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
     add_user(sql_connection, user_id, nickname=nickname, role='user')
     await safe_chat(context, update.effective_chat.id, f"Welcome {nickname}!")
+    await safe_chat(context, update.effective_chat.id, "⁉️ Here is some basic info ⁉️\n - Do you already know the code for the event? 👀 If you do, use the /koodi command to set the code.\nAfter this you can send song requests to the event organizer/DJ using the command /biisitoive\n - If you don't know the code, ask for it from the event organizer/DJ! 😊\n\n👀 Are you an event organizer or a DJ and want to setup your own code?\nFind out how using /jarjestaja_apu 🙌")
     return ConversationHandler.END
 
 def get_register_conv_handler():
