@@ -40,5 +40,27 @@ Contributions are welcome! Some planned features include:
 - Request frequency analytics
 - Hourly request graphs
 
+## Utilities
+
+### Botfather commands
+Finnish:
+```
+start - Register as a user
+koodi - Set recipient code
+biisitoive - Send a song request
+nikki - Update your nickname
+vastaanottaja - Register current chat as recipient
+uusi - Create new code for this chat
+omat - Show codes linked to this chat
+onoff - Toggle code on/off
+vanhenna - Expire a code
+uudista - Renew expired code
+vapauta - Release a code
+cancel - Cancel any operation
+apua - Show help
+```
+English:
+-TBD
+
 ## Contributing
 Feel free to submit issues and pull requests to help improve the bot!
