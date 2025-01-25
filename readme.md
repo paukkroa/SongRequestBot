@@ -45,19 +45,19 @@ Contributions are welcome! Some planned features include:
 ### Botfather commands
 Finnish:
 ```
-start - Register as a user
-koodi - Set recipient code
-biisitoive - Send a song request
-nikki - Update your nickname
-vastaanottaja - Register current chat as recipient
-uusi - Create new code for this chat
-omat - Show codes linked to this chat
-onoff - Toggle code on/off
-vanhenna - Expire a code
-uudista - Renew expired code
-vapauta - Release a code
-cancel - Cancel any operation
-apua - Show help
+start - Rekisteröidy käyttäjäksi
+koodi - Aseta vastaanottajan koodi
+biisitoive - Lähetä biisitoive vastaanottajalle
+nikki - Päivitä lempinimesi
+vastaanottaja - Rekisteröi nykyinen chat vastaanottajaksi
+uusi - Liitä uusi koodi tähän chattiin
+omat - Näytä tähän chattiin liitetyt koodit
+onoff - Aseta koodi päälle/pois
+vanhenna - Vanhenna koodi
+uudista - Uudista vannhentunut koodi
+vapauta - Vapauta koodi
+cancel - Peru mikä tahansa operaatio
+apua - Ohjeita
 ```
 English:
 -TBD
