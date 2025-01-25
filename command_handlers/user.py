@@ -114,9 +114,13 @@ def get_set_recipient_conv_handler():
         states={
             CHANGE_CODE: [CallbackQueryHandler(handle_change_code)],
             CODE_INPUT: [MessageHandler(filters.TEXT & ~filters.COMMAND, handle_code_input)],
-            PASSWORD_INPUT: [MessageHandler(filters.TEXT & ~filters.COMMAND, handle_password)]
+            PASSWORD_INPUT: [MessageHandler(filters.TEXT & ~filters.COMMAND, handle_password)],
+            ConversationHandler.TIMEOUT: [MessageHandler(filters.ALL, timeout)]
         },
-        fallbacks=[MessageHandler(filters.ALL, timeout), CommandHandler("cancel", lambda u,c: ConversationHandler.END)],
+        fallbacks=[
+            MessageHandler(filters.ALL & ~filters.Regex('^/cancel$'), timeout),
+            CommandHandler("cancel", lambda _,__: ConversationHandler.END)
+        ],
         conversation_timeout=300,  # 5 minutes timeout
         per_user=True,
         per_chat=True
@@ -180,9 +184,13 @@ def get_change_nickname_conv_handler():
         entry_points=[MessageHandler(filters.COMMAND & filters.Regex('^/nikki$'), change_nickname)],
         states={
             NICKNAME_CHANGE: [CallbackQueryHandler(handle_nickname_change)],
-            NEW_NICKNAME: [MessageHandler(filters.TEXT & ~filters.COMMAND, handle_new_nickname)]
+            NEW_NICKNAME: [MessageHandler(filters.TEXT & ~filters.COMMAND, handle_new_nickname)],
+            ConversationHandler.TIMEOUT: [MessageHandler(filters.ALL, timeout)]
         },
-        fallbacks=[MessageHandler(filters.ALL, timeout), CommandHandler("cancel", lambda u,c: ConversationHandler.END)],
+        fallbacks=[
+            MessageHandler(filters.ALL & ~filters.Regex('^/cancel$'), timeout),
+            CommandHandler("cancel", lambda _,__: ConversationHandler.END)
+        ],
         conversation_timeout=300,
         per_user=True,
         per_chat=True
@@ -237,9 +245,13 @@ def get_register_conv_handler():
         entry_points=[MessageHandler(filters.COMMAND & filters.Regex('^/start$'), register_user)],
         states={
             NICKNAME_CHOICE: [CallbackQueryHandler(nickname_choice)],
-            ENTER_NICKNAME: [MessageHandler(filters.TEXT & ~filters.COMMAND, save_nickname)]
+            ENTER_NICKNAME: [MessageHandler(filters.TEXT & ~filters.COMMAND, save_nickname)],
+            ConversationHandler.TIMEOUT: [MessageHandler(filters.ALL, timeout)]
         },
-        fallbacks=[MessageHandler(filters.ALL, timeout), CommandHandler("cancel", lambda u,c: ConversationHandler.END)],
+        fallbacks=[
+            MessageHandler(filters.ALL & ~filters.Regex('^/cancel$'), timeout),
+            CommandHandler("cancel", lambda _,__: ConversationHandler.END)
+        ],
         conversation_timeout=300,
         per_user=True,
         per_chat=True
@@ -360,9 +372,13 @@ def get_song_request_conv_handler():
                 MessageHandler(filters.TEXT & ~filters.COMMAND, notes),
                 CallbackQueryHandler(notes, pattern='^skip_notes$')
             ],
-            CONFIRMATION: [CallbackQueryHandler(confirm, pattern='^(yes|no)$')]
+            CONFIRMATION: [CallbackQueryHandler(confirm, pattern='^(yes|no)$')],
+            ConversationHandler.TIMEOUT: [MessageHandler(filters.ALL, timeout)]
         },
-        fallbacks=[MessageHandler(filters.ALL, timeout), CommandHandler("cancel", lambda u,c: ConversationHandler.END)],
+        fallbacks=[
+            MessageHandler(filters.ALL & ~filters.Regex('^/cancel$'), timeout),
+            CommandHandler("cancel", lambda _,__: ConversationHandler.END)
+        ],
         conversation_timeout=300,
         per_user=True,
         per_chat=True 

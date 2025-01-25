@@ -175,9 +175,13 @@ def get_create_address_conv_handler():
             ENTER_CUSTOM: [MessageHandler(filters.TEXT & ~filters.COMMAND, handle_custom_code)],
             CHOOSE_VALIDITY: [CallbackQueryHandler(handle_validity)],
             CHOOSE_PASSWORD: [CallbackQueryHandler(handle_password_choice)],
-            ENTER_PASSWORD: [MessageHandler(filters.TEXT & ~filters.COMMAND, handle_password)]
+            ENTER_PASSWORD: [MessageHandler(filters.TEXT & ~filters.COMMAND, handle_password)],
+            ConversationHandler.TIMEOUT: [MessageHandler(filters.ALL, timeout)]
         },
-        fallbacks=[MessageHandler(filters.ALL, timeout), CommandHandler("cancel", lambda u,c: ConversationHandler.END)],
+        fallbacks=[
+            MessageHandler(filters.ALL & ~filters.Regex('^/cancel$'), timeout),
+            CommandHandler("cancel", lambda _,__: ConversationHandler.END)
+        ],
         conversation_timeout=300,  # 5 minutes
         per_user=True,
         per_chat=True
@@ -241,12 +245,16 @@ async def handle_confirm_delete(update: Update, context: ContextTypes.DEFAULT_TY
 
 def get_remove_address_conv_handler():
     return ConversationHandler(
-        entry_points=[CommandHandler("poista", remove_address, filters.ChatType.GROUPS | filters.ChatType.PRIVATE)],
+        entry_points=[CommandHandler("vanhenna", remove_address, filters.ChatType.GROUPS | filters.ChatType.PRIVATE)],
         states={
             CHOOSE_ADDRESS: [CallbackQueryHandler(handle_address_selection)],
-            CONFIRM_DELETE: [CallbackQueryHandler(handle_confirm_delete)]
+            CONFIRM_DELETE: [CallbackQueryHandler(handle_confirm_delete)],
+            ConversationHandler.TIMEOUT: [MessageHandler(filters.ALL, timeout)]
         },
-        fallbacks=[MessageHandler(filters.ALL, timeout), CommandHandler("cancel", lambda u,c: ConversationHandler.END)],
+        fallbacks=[
+            MessageHandler(filters.ALL & ~filters.Regex('^/cancel$'), timeout),
+            CommandHandler("cancel", lambda _,__: ConversationHandler.END)
+        ],
         conversation_timeout=300,  # 5 minutes
         per_user=True,
         per_chat=True
@@ -320,9 +328,13 @@ def get_toggle_address_conv_handler():
     return ConversationHandler(
         entry_points=[CommandHandler("onoff", toggle_address, filters.ChatType.GROUPS | filters.ChatType.PRIVATE)],
         states={
-            TOGGLE_CHOOSE_ADDRESS: [CallbackQueryHandler(handle_toggle_selection)]
+            TOGGLE_CHOOSE_ADDRESS: [CallbackQueryHandler(handle_toggle_selection)],
+            ConversationHandler.TIMEOUT: [MessageHandler(filters.ALL, timeout)]
         },
-        fallbacks=[MessageHandler(filters.ALL, timeout), CommandHandler("cancel", lambda u,c: ConversationHandler.END)],
+        fallbacks=[
+            MessageHandler(filters.ALL & ~filters.Regex('^/cancel$'), timeout),
+            CommandHandler("cancel", lambda _,__: ConversationHandler.END)
+        ],
         conversation_timeout=300,  # 5 minutes
         per_user=True,
         per_chat=True
@@ -389,9 +401,13 @@ def get_release_address_conv_handler():
         entry_points=[CommandHandler("vapauta", release_address, filters.ChatType.GROUPS | filters.ChatType.PRIVATE)],
         states={
             RELEASE_CHOOSE_ADDRESS: [CallbackQueryHandler(handle_release_selection)],
-            RELEASE_CONFIRM: [CallbackQueryHandler(handle_release_confirm)]
+            RELEASE_CONFIRM: [CallbackQueryHandler(handle_release_confirm)],
+            ConversationHandler.TIMEOUT: [MessageHandler(filters.ALL, timeout)]
         },
-        fallbacks=[MessageHandler(filters.ALL, timeout), CommandHandler("cancel", lambda u,c: ConversationHandler.END)],
+        fallbacks=[
+            MessageHandler(filters.ALL & ~filters.Regex('^/cancel$'), timeout),
+            CommandHandler("cancel", lambda _,__: ConversationHandler.END)
+        ],
         conversation_timeout=300,  # 5 minutes
         per_user=True,
         per_chat=True
@@ -468,9 +484,13 @@ def get_renew_address_conv_handler():
         entry_points=[CommandHandler("uudista", renew_address_start)],
         states={
             RENEW_CHOOSE_ADDRESS: [CallbackQueryHandler(handle_renew_address_selection)],
-            RENEW_CHOOSE_VALIDITY: [CallbackQueryHandler(handle_renew_validity)]
+            RENEW_CHOOSE_VALIDITY: [CallbackQueryHandler(handle_renew_validity)],
+            ConversationHandler.TIMEOUT: [MessageHandler(filters.ALL, timeout)]
         },
-        fallbacks=[MessageHandler(filters.ALL, timeout), CommandHandler("cancel", lambda u,c: ConversationHandler.END)],
+        fallbacks=[
+            MessageHandler(filters.ALL & ~filters.Regex('^/cancel$'), timeout),
+            CommandHandler("cancel", lambda _,__: ConversationHandler.END)
+        ],
         conversation_timeout=300,
         per_user=True,
         per_chat=True
