@@ -34,17 +34,29 @@ A Telegram bot for managing song requests between users and event organizers/DJs
 - Recipients can be private or group chats
 - User can only be private chats
 
-## Installation and running from terminal
-1. `pip install -r requirements.txt`
-2. `export BOT_TOKEN=''`
-3. `export LANGUAGE='fi' ('en', 'fi')`
-4. `python3 bot.py`
+## Installation and running
+### Terminal
+```
+cd songrequestbot
+pip install -r requirements.txt
+export BOT_TOKEN='token'
+export LANGUAGE='fi' # 'fi' is the only option currently implemented
+python3 bot.py
+```
 
-## Docker
+### Docker
+Keep the database inside container:
 ```
 cd songrequestbot
 docker build -t songrequestbot .
-docker run -e BOT_TOKEN='token' -e BOT_LANGUAGE='fi' songrequestbot
+docker run --name songrequestbot -e BOT_TOKEN='token' -e BOT_LANGUAGE='fi' songrequestbot
+```
+
+Database exists on another volume (make sure the rw permissions are correct for the database):
+```
+cd songrequestbot
+docker build -t songrequestbot .
+docker run -v /path/to/database/:/app/database/:rw --name songrequestbot -e BOT_TOKEN='token' -e BOT_LANGUAGE='fi' songrequestbot
 ```
 
 ## Future Development
