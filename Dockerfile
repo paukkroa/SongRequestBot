@@ -27,15 +27,17 @@ RUN adduser \
     --uid "${UID}" \
     appuser
 
+# Copy the source code into the container.
+COPY . .
+
 # Download dependencies as a separate step to take advantage of Docker's caching.
-COPY requirements.txt requirements.txt
 RUN pip install --upgrade pip && pip install -r requirements.txt
+
+# Change ownership of the application directory to appuser
+RUN chown -R appuser:appuser /app
 
 # Switch to the non-privileged user to run the application.
 USER appuser
-
-# Copy the source code into the container.
-COPY . .
 
 # Run the application
 CMD python3 bot.py
