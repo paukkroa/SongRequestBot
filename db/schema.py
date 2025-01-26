@@ -1,10 +1,15 @@
 import sqlite3
+from utils.logger import get_logger
 
-def connect(db: str = 'songrequestbot.db') -> sqlite3.Connection:
+logger = get_logger(__name__)
+
+def connect(db: str = '/app/database/songrequestbot.db') -> sqlite3.Connection:
     conn = sqlite3.connect(db)
+    logger.info(f'Connected to database at {db}')
     return conn
 
 def close_connection(conn: sqlite3.Connection) -> None:
+    logger.info('Closing database connection')
     conn.close()
 
 def create_tables(conn: sqlite3.Connection) -> None:
@@ -62,3 +67,5 @@ def create_tables(conn: sqlite3.Connection) -> None:
         FOREIGN KEY (address) REFERENCES D_ADDRESS(address)
     );
     ''')
+
+    logger.info('Tables created if they did not exist yet.')
