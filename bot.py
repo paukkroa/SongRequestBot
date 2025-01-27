@@ -1,6 +1,7 @@
 from telegram import Update
 from telegram.ext import Application, CommandHandler, CommandHandler
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
+import asyncio
 
 from utils.config import BOT_TOKEN, LANGUAGE, sql_connection
 from utils.logger import get_logger
@@ -83,11 +84,11 @@ def main() -> None:
     update_nickname_conv_handler = handlers.get_change_nickname_conv_handler()
     application.add_handler(update_nickname_conv_handler)
 
+    # --- Run scheduled jobs ---
+    asyncio.get_event_loop().create_task(scheduled_jobs(application))
+
     # --- Run the bot until the user presses Ctrl-C ---
     application.run_polling(allowed_updates=Update.ALL_TYPES)
-
-    # --- Run scheduled jobs ---
-    application.run_asyncio(scheduled_jobs(application))
 
 if __name__ == "__main__":
     main()
